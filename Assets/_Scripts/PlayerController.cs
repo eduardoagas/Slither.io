@@ -20,7 +20,7 @@ public class PlayerController : NetworkBehaviour{
     }
     private void Update() {
         
-        if(IsOwner || !Application.isFocused) return;
+        if(!IsOwner || !Application.isFocused) return;
         //movement
         _mouseInput.x = Input.mousePosition.x;
         _mouseInput.y = Input.mousePosition.y;
@@ -30,7 +30,7 @@ public class PlayerController : NetworkBehaviour{
     
         //rotate
         if(mouseWorldCoordinates != transform.position){
-            Vector3 targetDirection = mouseWorldCoordinates = transform.position;
+            Vector3 targetDirection = mouseWorldCoordinates - transform.position;
             targetDirection.z = 0;
             transform.up = targetDirection; 
         }
