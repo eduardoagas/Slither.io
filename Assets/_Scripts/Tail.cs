@@ -1,5 +1,3 @@
-using System.Threading;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Tail : MonoBehaviour
@@ -11,7 +9,7 @@ public class Tail : MonoBehaviour
     [SerializeField] private float distance = 0.3f;
     [SerializeField] private float moveStep = 10f;
     private Vector3 _targetPosition;
-    void Update()
+    private void Update()
     {
         _targetPosition = followTransform.position - followTransform.forward * distance;
         _targetPosition += (transform.position - _targetPosition) * delayTime;
