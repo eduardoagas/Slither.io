@@ -16,13 +16,19 @@ public class PlayerLength : NetworkBehaviour
       _tails = new List<GameObject>();
       _lastTail = transform;
       _collider2D = GetComponent<Collider2D>();
+      if(! IsServer ) length.OnValueChanged += LengthChanged;
    }
 
    //This will be called by the server
    [ContextMenu("AddLength")]
-   private void AddLength(){
+   public void AddLength(){
       length.Value += 1;
       InstantiateTail();
+   }
+
+   private void LengthChanged(ushort previousValue, ushort newValue){
+      Debug.Log("LengthChanged Callback ");
+      InstantiateTail(); 
    }
 
    private void InstantiateTail(){
