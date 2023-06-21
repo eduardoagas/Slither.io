@@ -28,6 +28,32 @@ public class PlayerController : NetworkBehaviour{
         
         if(!IsOwner || !Application.isFocused) return;
         //movement
+        MovePlayerServer();
+
+    }
+
+    [ServerRpc]
+    private void MovePlayerServerRpc(Vector3 mouseWorldCoordinates){
+        transform.position = Vector3.MoveTowards(transform.position, mouseWorldCoordinates, Time.deltaTime * speed);
+    
+        //rotate
+        if(mouseWorldCoordinates != transform.position){
+            Vector3 targetDirection = mouseWorldCoordinates - transform.position;
+            targetDirection.z = 0;
+            transform.up = targetDirection; 
+        }
+    }
+    private void MovePlayerServer(){
+        _mouseInput.x = Input.mousePosition.x;
+        _mouseInput.y = Input.mousePosition.y;
+        _mouseInput.z = _mainCamera.nearClipPlane;
+        Vector3 mouseWorldCoordinates = _mainCamera.ScreenToWorldPoint(_mouseInput);
+        mouseWorldCoordinates.z = 0f;
+        MovePlayerServerRpc(mouseWorldCoordinates);
+    }
+
+    //client authorative move
+    private void MovePlayerClient(){
         _mouseInput.x = Input.mousePosition.x;
         _mouseInput.y = Input.mousePosition.y;
         _mouseInput.z = _mainCamera.nearClipPlane;
@@ -41,7 +67,6 @@ public class PlayerController : NetworkBehaviour{
             targetDirection.z = 0;
             transform.up = targetDirection; 
         }
-
     }
 
     //[ServerRpc(RequireOwnership = false)] //safer way for gathering ID from the client
