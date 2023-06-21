@@ -64,7 +64,7 @@ public class PlayerController : NetworkBehaviour{
             }
         };
         AtePlayerClientRpc(clientRpcParams);
-        _targetClientsArray[0] = winner;
+        _targetClientsArray[0] = loser;
         clientRpcParams.Send.TargetClientIds = _targetClientsArray;
         GameOverClientRpc(clientRpcParams);
     }
@@ -96,8 +96,9 @@ public class PlayerController : NetworkBehaviour{
         StartCoroutine(CollisionCheckCoroutine());
 
         //head-on collision
-        if(col.gameObject.TryGetComponent (out PlayerLength collidedPlayerLength)){
+        if(col.gameObject.TryGetComponent(out PlayerLength collidedPlayerLength)){
         // this checks if it's a head by try to get a component that only the head would have - playerlength or else             
+            Debug.Log("Head Collision");
             var player1 = new PlayerData(){
                 Id = OwnerClientId,
                 Length = _playerLength.length.Value
@@ -107,7 +108,7 @@ public class PlayerController : NetworkBehaviour{
                 Length = collidedPlayerLength.length.Value
             };
             DetermineCollisionWinnerServerRpc(player1, player2);
-        }else if(col.gameObject.TryGetComponent (out Tail tail)){
+        }else if(col.gameObject.TryGetComponent(out Tail tail)){
             Debug.Log("Tail Collision");
             WinInformationServerRpc(tail.networkedOwner.GetComponent<PlayerController>().OwnerClientId, OwnerClientId);
         }
