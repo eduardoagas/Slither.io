@@ -12,7 +12,7 @@ public class PlayerLength : NetworkBehaviour
    private Transform _lastTail;
    private Collider2D _collider2D;
    [CanBeNull] public static event  System.Action<ushort> ChangedLengthEvent;
-
+   
    public override void OnNetworkSpawn(){
       base.OnNetworkSpawn();
       _tails = new List<GameObject>();
@@ -28,7 +28,7 @@ public class PlayerLength : NetworkBehaviour
       base.OnNetworkDespawn();
       DestroyTails();
    }
-
+   
    void DestroyTails(){
       while(_tails.Count != 0){
          GameObject tail = _tails[0];
