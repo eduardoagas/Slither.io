@@ -34,7 +34,7 @@ public class PlayerController : NetworkBehaviour{
 
     [ServerRpc]
     private void MovePlayerServerRpc(Vector3 mouseWorldCoordinates){
-        transform.position = Vector3.MoveTowards(transform.position, mouseWorldCoordinates, Time.deltaTime * speed);
+        transform.position = Vector3.MoveTowards(transform.position, mouseWorldCoordinates, NetworkManager.Singleton.ServerTime.FixedDeltaTime * speed);
     
         //rotate
         if(mouseWorldCoordinates != transform.position){
@@ -74,14 +74,17 @@ public class PlayerController : NetworkBehaviour{
     private void DetermineCollisionWinnerServerRpc(PlayerData player1, PlayerData player2){
     //ServerRpc sufix is mandatory! yes, two requirements
         if(player1.Length > player2.Length){
-            WinInformationServerRpc(player1.Id, player2.Id);
+            WinInformation(player1.Id, player2.Id);
         }else{
-            WinInformationServerRpc(player2.Id, player1.Id);
+            WinInformation(player2.Id, player1.Id);
         }
     }
 
     [ServerRpc]
     private void WinInformationServerRpc(ulong winner, ulong loser){
+        WinInformation(winner, loser);
+    }
+    private void WinInformation(ulong winner, ulong loser){
         _targetClientsArray[0] = winner;
         ClientRpcParams clientRpcParams = new ClientRpcParams{
             Send = new ClientRpcSendParams{

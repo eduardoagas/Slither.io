@@ -7,9 +7,40 @@ public class FoodSpawner : NetworkBehaviour{
     // Start is called before the first frame update
     [SerializeField] private GameObject prefab;
     private const int MaxPrefabCount = 50;
+    private bool spawning = false;
+    private bool awoke = false;
+    private void Awake(){
+        if(!IsServer) return;
+        NetworkManager.Singleton.OnServerStarted += SpawnFoodStart;
+        awoke = true;
+    }
     private void Start()
     {
-        NetworkManager.Singleton.OnServerStarted += SpawnFoodStart;
+        if(!awoke) NetworkManager.Singleton.OnServerStarted += SpawnFoodStart;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnect;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnect;
+    }
+
+    private void OnDisable() {
+        if(!NetworkManager.Singleton) return;
+        NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnect;
+        NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnect;
+    }
+
+    private void OnClientDisconnect(ulong clientId)
+    {
+        if(!NetworkManager.Singleton.IsServer) return;
+        if(spawning && NetworkManager.Singleton.ConnectedClients.Count == 0){
+            spawning = false;
+        }
+    }
+
+    private void OnClientConnect(ulong clientId)
+    {
+        Debug.Log("On Client Connect " + NetworkManager.Singleton.IsServer);
+        if(!NetworkManager.Singleton.IsServer) return;
+        if(spawning) return;
+        StartCoroutine(SpawnOverTime());
     }
 
     private void SpawnFoodStart(){
@@ -18,12 +49,11 @@ public class FoodSpawner : NetworkBehaviour{
         for (int i = 0; i < 30; i++){
             SpawnFood();
         }
-        StartCoroutine(SpawnOverTime());
+        //StartCoroutine(SpawnOverTime());
     }
 
     private void SpawnFood(){
         NetworkObject obj = NetworkObjectPool.Singleton.GetNetworkObject(prefab, GetRandomPositionOnMap(), Quaternion.identity);
-        obj.GetComponent<Food>().prefab = prefab;
         if(!obj.IsSpawned) obj.Spawn(true);
     }
 
@@ -32,10 +62,12 @@ public class FoodSpawner : NetworkBehaviour{
     }
 
     private IEnumerator SpawnOverTime(){
-        while (NetworkManager.Singleton.ConnectedClients.Count > 0){
+        spawning = true;
+        while (spawning && NetworkManager.Singleton.ConnectedClients.Count > 0){
             yield return new WaitForSeconds(2f);
             if(NetworkObjectPool.Singleton.GetCurrentPrefabCount(prefab) < MaxPrefabCount)
                 SpawnFood();            
         }
+        spawning = false;
     }
 }

@@ -39,6 +39,7 @@ public class PlayerLength : NetworkBehaviour
 
    //This will be called by the server
    public void AddLength(){
+      if(!IsServer) return;
       length.Value += 1;
       LengthChanged();
    }

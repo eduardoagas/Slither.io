@@ -5,8 +5,8 @@ using Unity.Netcode;
 
 public class ConnectionApprovalHandler : MonoBehaviour
 {
-    private const int MaxPlayers = 10;
-    void Start()    {
+    public static int MaxPlayers = 10;
+    void Awake()    {
         NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
     }
 
